@@ -1,0 +1,71 @@
+spring:
+  shardingsphere:
+    props:
+      sql:
+        show: true
+    datasource:
+      names: ds0,ds1
+      ds0:
+        driver-class-name: com.mysql.jdbc.Driver
+        type: com.alibaba.druid.pool.DruidDataSource
+        url: jdbc:mysql://192.168.219.128:3310/myshop_0?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+        username: root
+        password: 123456
+        druid:
+          initial-size: 5
+          min-idle: 5
+          max-active: 100
+          max-wait: 60000
+          time-between-eviction-runs-millis: 60000
+          min-evictable-idle-time-millis: 300000
+          validationQuery: select 'x'
+          test-while-idle: true
+          test-on-borrow: false
+          test-on-return: false
+          filters: config,wall,stat
+          poolPreparedStatements: true
+          maxPoolPreparedStatementPerConnectionSize: 20
+          maxOpenPreparedStatements: 20
+          connectionProperties: druid.stat.slowSqlMillis=200;druid.stat.logSlowSql=true;config.decrypt=false
+      ds1:
+        driver-class-name: com.mysql.jdbc.Driver
+        type: com.alibaba.druid.pool.DruidDataSource
+        url: jdbc:mysql://192.168.219.128:3311/myshop_1?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+        username: root
+        password: 123456
+        druid:
+          initial-size: 5
+          min-idle: 5
+          max-active: 100
+          max-wait: 60000
+          time-between-eviction-runs-millis: 60000
+          min-evictable-idle-time-millis: 300000
+          validationQuery: select 'x'
+          test-while-idle: true
+          test-on-borrow: false
+          test-on-return: false
+          filters: config,wall,stat
+          poolPreparedStatements: true
+          maxPoolPreparedStatementPerConnectionSize: 20
+          maxOpenPreparedStatements: 20
+          connectionProperties: druid.stat.slowSqlMillis=200;druid.stat.logSlowSql=true;config.decrypt=false
+    sharding:
+      binding-tables: tb_order,tb_order_item
+      default-database-strategy:
+        inline:
+          algorithm-expression: ds$->{user_id % 2}
+          sharding-column: user_id
+      tables:
+        tb_order:
+          actual-data-nodes: ds$->{0..1}.tb_order_$->{0..1}
+          table-strategy:
+            inline:
+              algorithm-expression: tb_order_$->{order_id % 2}
+              sharding-column: order_id
+        tb_order_item:
+          actual-data-nodes: ds$->{0..1}.tb_order_item_$->{0..1}
+          table-strategy:
+            inline:
+              algorithm-expression: tb_order_item_$->{order_id % 2}
+              sharding-column: order_id
+
